@@ -108,16 +108,48 @@
 
 
 	//построение кривой ЭТО ПРИМЕР ПОСТРОЕНИЯ КРИВОЙ БЕЗЬЕ
-	ctx.beginPath();
-	ctx.moveTo(50, 50);
-	ctx.bezierCurveTo(50, 58, 160, 158, 160, 149);
-	ctx.lineWidth = 3;
-	ctx.strokeStyle = "red";
-	ctx.stroke();
-	ctx.closePath();
+	// ctx.beginPath();
+	// ctx.moveTo(50, 50);
+	// ctx.bezierCurveTo(50, 58, 160, 158, 160, 149);
+	// ctx.lineWidth = 3;
+	// ctx.strokeStyle = "red";
+	// ctx.stroke();
+	// ctx.closePath();
 
 
 	//вот тут можно строить сплайн
+	let xLeft, yLeft, xRight, yRight, 
+		k, xDelta, xDelta1,
+	    yPointA, yPointB, yPointC, xPointA,
+	    yAyB, yAyC;
+	xDelta = 0.05;
+
+	yPointA = u[0];
+	yPointB = 0;
+	yPointC = u[1];
+
+	for (let i = 0; i < 1; i += 0.1) {
+		yPointB = yPointA;
+		yPointA = yPointC;
+		yPointC = u[i];
+
+		yAyB = yPointA - yPointB;
+		yAyC = yPointA - yPointC;
+		k = (Math.sqrt((Math.pow(xDelta, 2) + Math.pow(yAyB, 2)) * (Math.pow(xDelta, 2) + Math.pow(yAyC, 2))) - Math.pow(xDelta, 2) - yAyB * yAyC) 
+		/ (xDelta * (yPointC - yPointB));
+
+		xDelta1 = xDelta / 2 * Math.sqrt(1 / (1 + Math.pow(k, 2)));
+		if (i == 0) ctx.quadraticCurveTo(xLeft, yLeft, xPointA, yPointA);
+		else if (i != 0.9) ctx.bezierCurveTo(xRight, yRight, xLeft, yLeft, xPointA, yPointA);
+		else ctx.quadraticCurveTo(xRight, yRight, xPointA, yPointA);
+
+		xLeft = xPointA - xDelta1;
+		yLeft = yPointA - xDelta1 * k;
+
+		xRight = xPointA + xDelta1;
+		yRight = yPointA + xDelta1 * k;
+	}
+	
 	
 </script>
 
