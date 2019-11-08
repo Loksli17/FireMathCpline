@@ -13,7 +13,6 @@
 		return num * Math.PI / 180;
 	}
 
-
 	let h = 0.01,
 		cS = 11, //масштаб
 		off = 50, //смещение в пикселях
@@ -80,8 +79,6 @@
     	valY = maxY * n * cS + off,
     	valU = maxY;
 
-    console.log(maxY * n * cS + off, stepY, stepU);
-
     //отметки по y
     for(let i = 10; i < n; i += 10){
     	
@@ -105,9 +102,19 @@
 		}else{
 			ctx.fillStyle = 'rgba(230, 150, 30, 1)';
 		}
+		console.log(i * cS + off, u[i] * n * cS + off);
 		ctx.fillRect(i * cS + off, u[i] * n * cS + off, 5, 5);
 	}
 
+
+	//построение кривой
+	ctx.beginPath();
+	ctx.moveTo(50, 50);
+	ctx.bezierCurveTo(50, 58, 160, 158, 160, 149);
+	ctx.lineWidth = 3;
+	ctx.strokeStyle = "red";
+	ctx.stroke();
+	ctx.closePath();
 	
 </script>
 
