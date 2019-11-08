@@ -59,7 +59,6 @@
     ctx.stroke();
     ctx.closePath();
 
-    
 
     //отметки по x
     for(let i = 0; i <= n; i += 10){
@@ -76,16 +75,51 @@
     	flagCont = false;
 
 
-    let stepY = (maxY * n * cS + off) / 10,
-    	val = off;
+    let stepY = Math.floor((maxY * n * cS + off) / 10),
+    	stepU = maxY / 10;
+    	valY = maxY * n * cS + off,
+    	valU = maxY;
 
-    console.log(maxY * n * cS + off);
+    console.log(maxY * n * cS + off, stepY, stepU);
 
     //отметки по y
-    for(let i = 0; i <= n; i += 10){
-    	val += stepY;
-    	console.log(val);
-    	// flagCont = false;
+    for(let i = 10; i < n; i += 10){
+    	
+    	ctx.save();
+    	ctx.translate(off - 25, valY);
+    	ctx.rotate(inRad(180));
+    	ctx.scale(-1, 1)
+    	ctx.fillText(valU.toString().substring(0, 4), 0, 0);
+    	ctx.restore();
+    	
+    	valU -= stepU
+    	valY -= stepY;
+    }
+
+
+	//строим точки
+	for(let i = 0; i <= n; i++){
+		if(!(i % 10)){
+			ctx.fillStyle = 'rgba(0, 50, 230, 1)';
+			us.push(u[i]);
+		}else{
+			ctx.fillStyle = 'rgba(230, 150, 30, 1)';
+		}
+		ctx.fillRect(i * cS + off, u[i] * n * cS + off, 5, 5);
+	}
+
+	
+</script>
+
+
+
+
+
+<script type="text/javascript">
+
+	//иной вариант построения ОСИ Y
+
+	// flagCont = false;
     	// var val = u[i].toString();
     	// val = val.substring(0, 4);
 
@@ -103,27 +137,6 @@
     	// 	continue;
     	// }else{
     	// 	blackList.push(val);
-    	// }
+    	// }	
 
-    	ctx.save();
-    	ctx.translate(off - 25, val);
-    	ctx.rotate(inRad(180));
-    	ctx.scale(-1, 1)
-    	ctx.fillText(val / 1000, 0, 0);
-    	ctx.restore();
-    }
-
-
-	//строим точки
-	for(let i = 0; i <= n; i++){
-		if(!(i % 10)){
-			ctx.fillStyle = 'rgba(0, 50, 230, 1)';
-			us.push(u[i]);
-		}else{
-			ctx.fillStyle = 'rgba(230, 150, 30, 1)';
-		}
-		ctx.fillRect(i * cS + off, u[i] * n * cS + off, 5, 5);
-	}
-
-	
 </script>
