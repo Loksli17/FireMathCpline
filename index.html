@@ -80,7 +80,7 @@
     	valU = maxY;
 
     //отметки по y
-    for(let i = 10; i < n; i += 10){
+    for(let i = 10; i < n; i += 10) {
     	
     	ctx.save();
     	ctx.translate(off - 25, valY);
@@ -99,10 +99,11 @@
 		if(!(i % 10)){
 			ctx.fillStyle = 'rgba(0, 50, 230, 1)';
 			us.push(u[i]);
-		}else{
+		} 
+		else {
 			ctx.fillStyle = 'rgba(230, 150, 30, 1)';
 		}
-		console.log(i * cS + off, u[i] * n * cS + off);
+		// console.log(i * cS + off, u[i] * n * cS + off);
 		ctx.fillRect(i * cS + off, u[i] * n * cS + off, 5, 5);
 	}
 
@@ -117,47 +118,52 @@
 	// ctx.closePath();
 
 
-	//вот тут можно строить сплайн
-	let xLeft, yLeft, xRight, yRight, 
-		k, xDelta, xDelta1,
-	    yPointA, yPointB, yPointC, xPointA,
-	    yAyB, yAyC;
-	xDelta = 0.05;
+	//===========================================================================СПЛАЙН БЕЗЬЕ
+	// let xLeft, yLeft, xRight, yRight, 
+	// 	k, xDelta, xDelta1,
+	//     yPointA, yPointB, yPointC, xPointA,
+	//     yAyB, yAyC;
+	// const deltaPoint = 50;
 
-	yPointA = u[0];
-	yPointB = 0;
-	yPointC = u[10];
+	// xDelta = 0.05;
 
-	ctx.beginPath();
-	ctx.moveTo(0, 0);
-	for (let i = 1; i < 1; i += 0.1) {
-		yPointB = yPointA;
-		yPointA = yPointC;
-		yPointC = u[i + 10];
+	// yPointA = u[0];
+	// yPointB = 0;
+	// yPointC = u[10];
 
-		yAyB = yPointA - yPointB;
-		yAyC = yPointA - yPointC;
-		k = (Math.sqrt((Math.pow(xDelta, 2) + Math.pow(yAyB, 2)) * (Math.pow(xDelta, 2) + Math.pow(yAyC, 2))) - Math.pow(xDelta, 2) - yAyB * yAyC) 
-		/ (xDelta * (yPointC - yPointB));
+	// ctx.beginPath();
+	// ctx.moveTo(deltaPoint, deltaPoint);
+	// for (let i = 10; i < 100; i += 10) {
+	// 	yPointB = yPointA;
+	// 	yPointA = yPointC;
+	// 	yPointC = u[i + 10];
+	// 	xPointA = i + 5;
 
-		xDelta1 = xDelta / 2 * Math.sqrt(1 / (1 + Math.pow(k, 2)));
+	// 	yAyB = yPointA - yPointB;
+	// 	yAyC = yPointA - yPointC;
+	// 	k = (Math.sqrt((Math.pow(xDelta, 2) + Math.pow(yAyB, 2)) * (Math.pow(xDelta, 2) + Math.pow(yAyC, 2))) - Math.pow(xDelta, 2) - yAyB * yAyC) 
+	// 	/ (xDelta * (yPointC - yPointB));
 
-		xLeft = xPointA - xDelta1;
-		yLeft = yPointA - xDelta1 * k;
-		
-		if (i == 0) ctx.quadraticCurveTo(xLeft, yLeft, xPointA, yPointA);
-		else if (i != 0.9) ctx.bezierCurveTo(xRight, yRight, xLeft, yLeft, xPointA, yPointA);
-		else ctx.quadraticCurveTo(xRight, yRight, xPointA, yPointA);
+	// 	xDelta1 = xDelta / 2 * Math.sqrt(1 / (1 + Math.pow(k, 2)));
 
-		xRight = xPointA + xDelta1;
-		yRight = yPointA + xDelta1 * k;
-	}
-	ctx.lineWidth = 3;
-	ctx.strokeStyle = "red";
-	ctx.stroke();
+	// 	xLeft = xPointA - xDelta1;
+	// 	yLeft = yPointA - xDelta1 * k;
+	// 	xRight = xPointA + xDelta1;
+	// 	yRight = yPointA + xDelta1 * k;
+
+	// 	console.log(xRight, yRight, xLeft, yLeft, xPointA, yPointA);
+
+	// 	// if (i == 0) ctx.quadraticCurveTo(xLeft + deltaPoint, yLeft + deltaPoint, xPointA + deltaPoint, yPointA + deltaPoint);
+	// 	ctx.bezierCurveTo(xRight + deltaPoint, yRight + deltaPoint, xLeft + deltaPoint, yLeft + deltaPoint, xPointA + deltaPoint, yPointA + deltaPoint);
+	// 	// else ctx.quadraticCurveTo(xRight + deltaPoint, yRight + deltaPoint, xPointA + deltaPoint, yPointA + deltaPoint);
+	// }
+	// ctx.lineWidth = 3;
+	// ctx.strokeStyle = "red";
+	// ctx.stroke();
+
+	//===========================================================================СПЛАЙН ТРЕТЬЕЙ СТЕПЕНИ
+	
 </script>
-
-
 
 
 
