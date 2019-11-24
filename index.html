@@ -22,6 +22,7 @@
 		us = new Array(), //координаты для сплайна
 		yA = new Array(), //координаты оси y
 		xA = new Array(), //координаты оси x
+		uPolin = new Array(), //значение полинома
 		maxY = 0;
 		n = 100; 
 
@@ -43,10 +44,11 @@
 		}
 	}
 
+
 	//построение функции
 	let canvas = document.getElementById('canvas');
 	let ctx = canvas.getContext('2d');
-	
+
 	//строим оси
 	ctx.beginPath();
 	ctx.moveTo(off, off);
@@ -78,7 +80,7 @@
     	valU = maxY;
 
     //отметки по y
-    for(let i = 10; i < n; i += 10){
+    for(let i = 10; i < n; i += 10) {
     	
     	ctx.save();
     	ctx.translate(off - 25, valY);
@@ -97,18 +99,128 @@
 		if(!(i % 10)){
 			ctx.fillStyle = 'rgba(0, 50, 230, 1)';
 			us.push(u[i]);
-		}else{
+		} 
+		else {
 			ctx.fillStyle = 'rgba(230, 150, 30, 1)';
 		}
+		// console.log(i * cS + off, u[i] * n * cS + off);
 		ctx.fillRect(i * cS + off, u[i] * n * cS + off, 5, 5);
 	}
 
+	//================================СПЛАЙН БЕЗЬЕ================================
+	// let xLeft, yLeft, xRight, yRight, 
+	// 	k, xDelta, xDelta1,
+	//     yPointA, yPointB, yPointC, xPointA,
+	//     yAyB, yAyC;
+	// const deltaPoint = 50;
+
+	// xDelta = 0.05;
+
+	// yPointA = u[0];
+	// yPointB = 0;
+	// yPointC = u[10];
 
 	//вот тут можно строить сплайн
 	console.log(u[0], u[10]);
-	
 
+	// ctx.beginPath();
+	// ctx.moveTo(deltaPoint, deltaPoint);
+	// for (let i = 10; i < 100; i += 10) {
+	// 	yPointB = yPointA;
+	// 	yPointA = yPointC;
+	// 	yPointC = u[i + 10];
+	// 	xPointA = i + 5;
+
+	// 	yAyB = yPointA - yPointB;
+	// 	yAyC = yPointA - yPointC;
+	// 	k = (Math.sqrt((Math.pow(xDelta, 2) + Math.pow(yAyB, 2)) * (Math.pow(xDelta, 2) + Math.pow(yAyC, 2))) - Math.pow(xDelta, 2) - yAyB * yAyC) 
+	// 	/ (xDelta * (yPointC - yPointB));
+
+	// 	xDelta1 = xDelta / 2 * Math.sqrt(1 / (1 + Math.pow(k, 2)));
+
+	// 	xLeft = xPointA - xDelta1;
+	// 	yLeft = yPointA - xDelta1 * k;
+	// 	xRight = xPointA + xDelta1;
+	// 	yRight = yPointA + xDelta1 * k;
+
+	// 	console.log(xRight, yRight, xLeft, yLeft, xPointA, yPointA);
+
+	// 	// if (i == 0) ctx.quadraticCurveTo(xLeft + deltaPoint, yLeft + deltaPoint, xPointA + deltaPoint, yPointA + deltaPoint);
+	// 	ctx.bezierCurveTo(xRight + deltaPoint, yRight + deltaPoint, xLeft + deltaPoint, yLeft + deltaPoint, xPointA + deltaPoint, yPointA + deltaPoint);
+	// 	// else ctx.quadraticCurveTo(xRight + deltaPoint, yRight + deltaPoint, xPointA + deltaPoint, yPointA + deltaPoint);
+	// }
+	// ctx.lineWidth = 3;
+	// ctx.strokeStyle = "red";
+	// ctx.stroke();
+
+	//================================СПЛАЙН ТРЕТЬЕЙ СТЕПЕНИ================================
+	let S = 0,
+		i_ = 0,
+		i1 = 0,
+	    m = new Array();
+    h = 0.1;
+
+    for(let i = 0; i <= 10; i++) m[i] = 0;
+    m[0] = ( 4*u[10] - u[20] - 3*u[0] ) / 2 * h;
+	m[10] = ( 3*u[100] - u[80] - 3*u[90] ) / 2 * h;
+
+    for(let i = 1; i < 10; i++) m[i] = ( u[i*10 + 10] - u[i*10 - 10] ) / 2 * h;
+
+    for(let i = 0; i <= 100; i++) {
+    	i1 = Math.floor(i/10)*10;
+    	i_ = i / 100;
+    	if (i % 10 != 0)
+    	S = ( (  ( ( Math.pow(x[i1 + 10] - i_, 2) * (2 * (i_ - x[i1]) + h) ) / Math.pow(h, 3)) * u[Math.floor(i/10)*10]  ) + 
+    		(  ( ( Math.pow(i_ - x[i1], 2) * (2 * (x[i1 + 10] - i_) + h) ) / Math.pow(h, 3)) * u[Math.floor(i/10)*10 + 10]  ) + 
+    		(  ( ( Math.pow(x[i1 + 10] - i_, 2) * (i_ - x[i1]) ) / Math.pow(h, 2)) * m[Math.floor(i/10)]  ) + 
+    		(  ( ( Math.pow(i_ - x[i1], 2) * (i_ - x[i1 + 10]) ) / Math.pow(h, 2)) * m[Math.floor(i/10) + 1]  ) );
+    	else S = u[i];
+    	uPolin.push(S);
+	}
+	
+	for(let i = 0; i <= 100; i++){
+		ctx.beginPath();
+		ctx.moveTo(i * cS + off, uPolin[i] * n * cS + off + 2.5);
+		ctx.lineTo((i + 1) * cS + off, uPolin[i + 1] * n * cS + off + 2.5);
+		ctx.lineWidth = 1.5;
+		ctx.strokeStyle = "blue";
+		ctx.stroke();
+		ctx.closePath();
+	}
+
+	console.log(u[10]);
+		//строим отрезки
+		
+		// ctx.bezierCurveTo(50, 58, 160, 158, 160, 149);
+		// ctx.lineWidth = 3;
+		// ctx.strokeStyle = "red";
+		// ctx.stroke();
+		// ctx.closePath();
 
 </script>
 
+<script type="text/javascript">
 
+	//иной вариант построения ОСИ Y
+
+	// flagCont = false;
+    	// var val = u[i].toString();
+    	// val = val.substring(0, 4);
+
+    	// if(i > 1){
+    	// 	for(let j = 0; j < blackList.length; j++){
+    	// 		console.log(val, blackList[j]);
+    	// 		if(val == blackList[j]){
+    	// 			flagCont = true;
+    	// 			break;
+    	// 		}
+    	// 	}
+    	// }
+
+    	// if(flagCont){
+    	// 	continue;
+    	// }else{
+    	// 	blackList.push(val);
+    	// }	
+
+</script>
