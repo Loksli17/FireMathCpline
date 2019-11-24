@@ -5,19 +5,155 @@
 	}
 </style>
 
+
+
+
+
 <script type="text/javascript">	
+
+
+var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext("2d");
 
-	ctx.strokeStyle = "olive";
-  ctx.beginPath();
-  cx = canvas.width / 2;
-  cy = canvas.height / 2;
-  ctx.moveTo(cx, cy);
-  for (i = 1; i<200; i++) {
-    x = i*3;
-    y = 40*Math.sin(10*i/180*Math.PI);
-    ctx.lineTo(cx+x, cy+y);
-  }
-  ctx.lineWidth = 4;
-  ctx.stroke();
+function Coord(x, y){
+	this.x = x;
+	this.y = y;
+};
+
+function Axle(len, step){
+	this.len = len;
+	this.step = step;
+}
+
+
+let h           = 0.01,
+	cS          = 11, //масштаб
+	off         = 50, //смещение в пикселях
+	n           = 300,
+	sinusTrue   = new Array(),
+	stepSpline  = 20,
+	sinusSpline = new Array();
+
+//оси
+let axisX = new Axle(1000, 20),
+	axisY = new Axle(200, 100);
+	
+
+function inRad(num) {
+	return num * Math.PI / 180;
+}
+
+
+function drawCinus(){
+	ctx.strokeStyle = "green";
+	ctx.beginPath();
+
+	for (i = 0; i <= n; i++) {
+  		x = i * 3;
+  		y = 120 * Math.sin(12 * i / 180 * Math.PI);
+  		ctx.lineTo(off + x, off + (axisY.len / 2) + y);
+  		var coord = new Coord(x, y);
+  		sinusTrue.push(coord);
+	}  
+
+	ctx.lineWidth = 1.5;
+	ctx.stroke();
+	ctx.closePath();
+}
+
+
+function drawAxis(){
+	ctx.beginPath();
+	ctx.moveTo(off, off + (axisY.len / 2));
+    ctx.lineTo(axisX.len + (off * 2), off + (axisY.len / 2));
+    ctx.stroke();
+    ctx.moveTo(off, off);
+    ctx.lineTo(off, axisY.len + (off * 4));
+    ctx.stroke();
+    ctx.closePath();
+}
+
+
+function drawMarks(){
+
+	let step = 0;
+	//по x 
+	for(let i = 0; i <= n; i += axisX.step){
+    	ctx.save();
+    	ctx.translate(off + sinusTrue[i].x, off - 10 + (axisY.len / 2));
+    	ctx.rotate(inRad(180));
+    	ctx.scale(-1, 1)
+    	ctx.fillText(sinusTrue[i].x, 0, 0);
+    	ctx.restore();
+    }
+
+    //по y
+    for(let i = 0; i <= n; i += axisY.step){
+    	ctx.save();
+    	ctx.translate(off - (off - 10), off + (axisY.len / 2) + sinusTrue[i].y);
+    	ctx.rotate(inRad(180));
+    	ctx.scale(-1, 1)
+    	ctx.fillText(sinusTrue[i].y.toString().substring(0, 6), 0, 0);
+    	ctx.restore();
+    }
+}
+
+
+function drawSpline(){
+	let S = 0,
+		i_ = 0,
+		i1 = 0,
+	    m = new Array();
+    	h = 0.1;
+
+    for(let i = 0; i <= 10; i++) m[i] = 0;
+    m[0] = ( 4*u[10] - u[20] - 3*u[0] ) / 2 * h;
+	m[10] = ( 3*u[100] - u[80] - 3*u[90] ) / 2 * h;
+
+    for(let i = 1; i < 10; i++) m[i] = ( u[i*10 + 10] - u[i*10 - 10] ) / 2 * h;
+
+    for(let i = 0; i <= 100; i++) {
+    	i1 = Math.floor(i/10)*10;
+    	i_ = i / 100;
+    	if (i % 10 != 0)
+    	S = ( (  ( ( Math.pow(x[i1 + 10] - i_, 2) * (2 * (i_ - x[i1]) + h) ) / Math.pow(h, 3)) * u[Math.floor(i/10)*10]  ) + 
+    		(  ( ( Math.pow(i_ - x[i1], 2) * (2 * (x[i1 + 10] - i_) + h) ) / Math.pow(h, 3)) * u[Math.floor(i/10)*10 + 10]  ) + 
+    		(  ( ( Math.pow(x[i1 + 10] - i_, 2) * (i_ - x[i1]) ) / Math.pow(h, 2)) * m[Math.floor(i/10)]  ) + 
+    		(  ( ( Math.pow(i_ - x[i1], 2) * (i_ - x[i1 + 10]) ) / Math.pow(h, 2)) * m[Math.floor(i/10) + 1]  ) );
+    	else S = u[i];
+    	uPolin.push(S);
+	}
+	
+	for(let i = 0; i <= 100; i++){
+		ctx.beginPath();
+		ctx.moveTo(i * cS + off, uPolin[i] * n * cS + off + 2.5);
+		ctx.lineTo((i + 1) * cS + off, uPolin[i + 1] * n * cS + off + 2.5);
+		ctx.lineWidth = 1.5;
+		ctx.strokeStyle = "blue";
+		ctx.stroke();
+		ctx.closePath();
+	}
+}
+
+
+
+
+//точка входа
+window.onload = function(){
+	
+	drawAxis();
+	drawCinus();
+	drawMarks();
+
+	//создание массива значений с шагом 
+	for(let i = 0; i <= n; i += stepSpline){
+		sinusSpline.push(sinusTrue[i]);
+	}
+
+
+
+}
+
+
+
 </script>
