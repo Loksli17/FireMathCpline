@@ -1,0 +1,71 @@
+<script>
+	
+	// БЕЗЬЕ
+
+
+	// let xLeft, yLeft, xRight, yRight, 
+	// 	k, xDelta, xDelta1,
+	//     yPointA, yPointB, yPointC, xPointA,
+	//     yAyB, yAyC;
+	// 	xDelta = 0.05;	
+
+	// yPointA = u[0];
+	// yPointB = 0;
+	// yPointC = u[10];
+
+	// ctx.beginPath();
+	// ctx.moveTo(0, 0);
+	// ctx.lineWidth = 3;
+	// ctx.strokeStyle = "red";
+	// ctx.stroke();
+
+
+
+	// for (let i = 10; i < 100; i += 10) {
+	// 	yPointB = yPointA;
+	// 	yPointA = yPointC;
+	// 	yPointC = u[i + 10];
+
+	// 	yAyB = yPointA - yPointB;
+	// 	yAyC = yPointA - yPointC;
+	// 	k = (Math.sqrt((Math.pow(xDelta, 2) + Math.pow(yAyB, 2)) * (Math.pow(xDelta, 2) + Math.pow(yAyC, 2))) - Math.pow(xDelta, 2) - yAyB * yAyC) 
+	// 	/ (xDelta * (yPointC - yPointB));
+	// 	console.log(k);
+
+	// 	xDelta1 = xDelta / 2 * Math.sqrt(1 / (1 + Math.pow(k, 2)));
+
+	// 	xLeft = xPointA - xDelta1;
+	// 	yLeft = yPointA - xDelta1 * k;
+		
+	// 	if (i == 0) ctx.quadraticCurveTo(xLeft, yLeft, xPointA, yPointA);
+	// 	else if (i != 0.9) ctx.bezierCurveTo(xRight, yRight, xLeft, yLeft, xPointA, yPointA);
+	// 	else ctx.quadraticCurveTo(xRight, yRight, xPointA, yPointA);
+
+	// 	xRight = xPointA + xDelta1;
+	// 	yRight = yPointA + xDelta1 * k;
+	// }
+
+
+	//иной вариант построения ОСИ Y
+
+	// flagCont = false;
+    	// var val = u[i].toString();
+    	// val = val.substring(0, 4);
+
+    	// if(i > 1){
+    	// 	for(let j = 0; j < blackList.length; j++){
+    	// 		console.log(val, blackList[j]);
+    	// 		if(val == blackList[j]){
+    	// 			flagCont = true;
+    	// 			break;
+    	// 		}
+    	// 	}
+    	// }
+
+    	// if(flagCont){
+    	// 	continue;
+    	// }else{
+    	// 	blackList.push(val);
+    	// }
+
+</script>

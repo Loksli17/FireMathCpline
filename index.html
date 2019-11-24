@@ -47,7 +47,6 @@
 	let canvas = document.getElementById('canvas');
 	let ctx = canvas.getContext('2d');
 	
-
 	//строим оси
 	ctx.beginPath();
 	ctx.moveTo(off, off);
@@ -72,7 +71,6 @@
 
     let blackList = new Array(),
     	flagCont = false;
-
 
     let stepY = Math.floor((maxY * n * cS + off) / 10),
     	stepU = maxY / 10;
@@ -102,87 +100,15 @@
 		}else{
 			ctx.fillStyle = 'rgba(230, 150, 30, 1)';
 		}
-		console.log(i * cS + off, u[i] * n * cS + off);
 		ctx.fillRect(i * cS + off, u[i] * n * cS + off, 5, 5);
 	}
 
 
-	//построение кривой ЭТО ПРИМЕР ПОСТРОЕНИЯ КРИВОЙ БЕЗЬЕ
-	// ctx.beginPath();
-	// ctx.moveTo(50, 50);
-	// ctx.bezierCurveTo(50, 58, 160, 158, 160, 149);
-	// ctx.lineWidth = 3;
-	// ctx.strokeStyle = "red";
-	// ctx.stroke();
-	// ctx.closePath();
-
-
 	//вот тут можно строить сплайн
-	let xLeft, yLeft, xRight, yRight, 
-		k, xDelta, xDelta1,
-	    yPointA, yPointB, yPointC, xPointA,
-	    yAyB, yAyC;
-	xDelta = 0.05;
+	console.log(u[0], u[10]);
+	
 
-	yPointA = u[0];
-	yPointB = 0;
-	yPointC = u[10];
 
-	ctx.beginPath();
-	ctx.moveTo(0, 0);
-	for (let i = 1; i < 1; i += 0.1) {
-		yPointB = yPointA;
-		yPointA = yPointC;
-		yPointC = u[i + 10];
-
-		yAyB = yPointA - yPointB;
-		yAyC = yPointA - yPointC;
-		k = (Math.sqrt((Math.pow(xDelta, 2) + Math.pow(yAyB, 2)) * (Math.pow(xDelta, 2) + Math.pow(yAyC, 2))) - Math.pow(xDelta, 2) - yAyB * yAyC) 
-		/ (xDelta * (yPointC - yPointB));
-
-		xDelta1 = xDelta / 2 * Math.sqrt(1 / (1 + Math.pow(k, 2)));
-
-		xLeft = xPointA - xDelta1;
-		yLeft = yPointA - xDelta1 * k;
-		
-		if (i == 0) ctx.quadraticCurveTo(xLeft, yLeft, xPointA, yPointA);
-		else if (i != 0.9) ctx.bezierCurveTo(xRight, yRight, xLeft, yLeft, xPointA, yPointA);
-		else ctx.quadraticCurveTo(xRight, yRight, xPointA, yPointA);
-
-		xRight = xPointA + xDelta1;
-		yRight = yPointA + xDelta1 * k;
-	}
-	ctx.lineWidth = 3;
-	ctx.strokeStyle = "red";
-	ctx.stroke();
 </script>
 
 
-
-
-
-<script type="text/javascript">
-
-	//иной вариант построения ОСИ Y
-
-	// flagCont = false;
-    	// var val = u[i].toString();
-    	// val = val.substring(0, 4);
-
-    	// if(i > 1){
-    	// 	for(let j = 0; j < blackList.length; j++){
-    	// 		console.log(val, blackList[j]);
-    	// 		if(val == blackList[j]){
-    	// 			flagCont = true;
-    	// 			break;
-    	// 		}
-    	// 	}
-    	// }
-
-    	// if(flagCont){
-    	// 	continue;
-    	// }else{
-    	// 	blackList.push(val);
-    	// }	
-
-</script>
