@@ -114,30 +114,30 @@ function drawSpline(){
 	m[10] = (3 * sinusTrue[100].y - sinusTrue[80].y - 3 * sinusTrue[90].y) / 2 * h;
 
     for(let i = 1; i < 10; i++) m[i] = (sinusTrue[i * 10 + 10].y - sinusTrue[i * 10 - 10].y) / 2 * h;
-    console.log(m);
 
     for(let i = 0; i <= n; i++) {
     	i1 = Math.floor(i / 10) * 10;
     	i_ = i / 100;
     	if (i % 10 != 0)
-    	S = ( (  ( ( Math.pow(x[i1 + 10] - i_, 2) * (2 * (i_ - x[i1]) + h) ) / Math.pow(h, 3)) * sinusTrue[Math.floor(i/10)*10].y  ) + 
-    		(  ( ( Math.pow(i_ - x[i1], 2) * (2 * (x[i1 + 10] - i_) + h) ) / Math.pow(h, 3)) * sinusTrue[Math.floor(i/10)*10 + 10].y  ) + 
-    		(  ( ( Math.pow(x[i1 + 10] - i_, 2) * (i_ - x[i1]) ) / Math.pow(h, 2)) * m[Math.floor(i/10)]  ) + 
-    		(  ( ( Math.pow(i_ - x[i1], 2) * (i_ - x[i1 + 10]) ) / Math.pow(h, 2)) * m[Math.floor(i/10) + 1]  ) );
+    	S = (((Math.pow(sinusTrue[i1 + 10].x - i_, 2) * (2 * (i_ -sinusTrue[i1].x) + h)) / Math.pow(h, 3)) * sinusTrue[Math.floor(i/10)*10].y) + 
+    		(((Math.pow(i_ - sinusTrue[i1].x, 2) * (2 * (sinusTrue[i1 + 10].x - i_) + h)) / Math.pow(h, 3)) * sinusTrue[Math.floor(i/10)*10 + 10].y) + 
+    		(((Math.pow(sinusTrue[i1 + 10].x - i_, 2) * (i_ - sinusTrue[i1].x) ) / Math.pow(h, 2)) * m[Math.floor(i/10)]  ) + 
+    		(((Math.pow(i_ - sinusTrue[i1].x, 2) * (i_ - sinusTrue[i1 + 10].x) ) / Math.pow(h, 2)) * m[Math.floor(i/10) + 1]);
     	else S = sinusTrue[i].y;
     	uPolin.push(S);
-    	console.log(S);
+
+    	ctx.fillRect(sinusTrue[i].x + off, off + (axisY.len / 2) + S, 5, 5);
 	}
 	
-	for(let i = 0; i <= 100; i++){
-		ctx.beginPath();
-		ctx.moveTo(i * cS + off, uPolin[i] * n * cS + off + 2.5);
-		ctx.lineTo((i + 1) * cS + off, uPolin[i + 1] * n * cS + off + 2.5);
-		ctx.lineWidth = 1.5;
-		ctx.strokeStyle = "blue";
-		ctx.stroke();
-		ctx.closePath();
-	}
+	// for(let i = 0; i <= 100; i++){
+	// 	ctx.beginPath();
+	// 	ctx.moveTo(sinusTrue[i].x + off, uPolin[i] * n * cS + off + 2.5);
+	// 	ctx.lineTo((i + 1) * cS + off, uPolin[i + 1] * n * cS + off + 2.5);
+	// 	ctx.lineWidth = 1.5;
+	// 	ctx.strokeStyle = "blue";
+	// 	ctx.stroke();
+	// 	ctx.closePath();
+	// }
 }
 
 
