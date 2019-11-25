@@ -45,7 +45,7 @@ function inRad(num) {
 
 
 function drawCinus(){
-	ctx.strokeStyle = "green";
+	ctx.strokeStyle = "black";
 	ctx.beginPath();
 
 	for (i = 0; i <= n; i++) {
@@ -57,8 +57,8 @@ function drawCinus(){
   		console.log(coord);
 	}  
 
-	ctx.lineWidth = 4;
-	// ctx.stroke();
+	ctx.lineWidth = 5;
+	ctx.stroke();
 	ctx.closePath();
 }
 
@@ -125,15 +125,16 @@ function drawSpline(){
     		(((Math.pow(i_ - sinusTrue[i1].x, 2) * (i_ - sinusTrue[i1 + 10].x) ) / Math.pow(h, 2)) * m[Math.floor(i/10) + 1]);
     	else S = sinusTrue[i].y;
     	uPolin.push(S);
-    	ctx.fillRect(sinusTrue[i].x + off, off + (axisY.len / 2) + S, 5, 5);
+    	ctx.fillStyle = "red";
+    	ctx.fillRect(sinusTrue[i].x + off - 2.5, off + (axisY.len / 2) + S - 2.5, 5, 5);
 	}
 	
 	for(let i = 0; i < 100; i++){
 		ctx.beginPath();
 		ctx.moveTo(sinusTrue[i].x + off, off + (axisY.len / 2) + sinusTrue[i].y);
 		ctx.lineTo(sinusTrue[i + 1].x  + off, off + (axisY.len / 2) + sinusTrue[i + 1].y);
-		ctx.lineWidth = 1.5;
-		ctx.strokeStyle = "blue";
+		ctx.lineWidth = 1.25;
+		ctx.strokeStyle = "red";
 		ctx.stroke();
 		ctx.closePath();
 	}
