@@ -29,7 +29,7 @@ function Axle(len, step){
 let h           = 0.01,
 	cS          = 11, //масштаб
 	off         = 50, //смещение в пикселях
-	n           = 100,
+	n           = 200,
 	sinusTrue   = new Array(),
 	stepSpline  = 20,
 	sinusSpline = new Array();
@@ -45,12 +45,12 @@ function inRad(num) {
 
 
 function drawCinus(){
-	ctx.strokeStyle = "black";
+	ctx.strokeStyle = "blue";
 	ctx.beginPath();
 
 	for (i = 0; i <= n; i++) {
   		x = i * 3;
-  		y = 120 * Math.sin(12 * i / 180 * Math.PI);
+  		y = 110 * Math.sin(12 * i / 180 * Math.PI);
   		ctx.lineTo(off + x, off + (axisY.len / 2) + y);
   		var coord = new Coord(x, y);
   		sinusTrue.push(coord);
@@ -107,15 +107,16 @@ function drawSpline(){
 		i1 = 0,
 	    m = new Array(),
 	    uPolin = new Array();
-    	h = 0.1;
+    	h = 0.1,
+    	step = n / 10;
 
-    for(let i = 0; i <= 10; i++) m[i] = 0;
-    m[0] = (4 * sinusTrue[10].y - sinusTrue[20].y - 3 * sinusTrue[0].y) / 2 * h;
-	m[10] = (3 * sinusTrue[100].y - sinusTrue[80].y - 3 * sinusTrue[90].y) / 2 * h;
+    for(let i = 0; i <= n; i++) m[i] = 0;
+    m[0] = (4 * sinusTrue[step].y - sinusTrue[step * 2].y - 3 * sinusTrue[0].y) / 2 * h;
+	m[10] = (3 * sinusTrue[n].y - sinusTrue[n - (step * 2)].y - 3 * sinusTrue[n - step].y) / 2 * h;
 
-    for(let i = 1; i < 10; i++) m[i] = (sinusTrue[i * 10 + 10].y - sinusTrue[i * 10 - 10].y) / 2 * h;
+    for(let i = 1; i < 10; i++) m[i] = (sinusTrue[i * step + step].y - sinusTrue[i * step - step].y) / 2 * h;
 
-    for(let i = 0; i <= n; i++) {
+    for(let i = 0; i <= n; i++){
     	i1 = Math.floor(i / 10) * 10;
     	i_ = i / 100;
     	if (i % 10 != 0)
@@ -129,11 +130,11 @@ function drawSpline(){
     	ctx.fillRect(sinusTrue[i].x + off - 2.5, off + (axisY.len / 2) + S - 2.5, 5, 5);
 	}
 	
-	for(let i = 0; i < 100; i++){
+	for(let i = 0; i < n; i++){
 		ctx.beginPath();
 		ctx.moveTo(sinusTrue[i].x + off, off + (axisY.len / 2) + sinusTrue[i].y);
 		ctx.lineTo(sinusTrue[i + 1].x  + off, off + (axisY.len / 2) + sinusTrue[i + 1].y);
-		ctx.lineWidth = 1.25;
+		ctx.lineWidth = 1.75;
 		ctx.strokeStyle = "red";
 		ctx.stroke();
 		ctx.closePath();
