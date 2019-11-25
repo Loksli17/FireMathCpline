@@ -57,8 +57,8 @@ function drawCinus(){
   		console.log(coord);
 	}  
 
-	ctx.lineWidth = 1.5;
-	ctx.stroke();
+	ctx.lineWidth = 4;
+	// ctx.stroke();
 	ctx.closePath();
 }
 
@@ -125,19 +125,18 @@ function drawSpline(){
     		(((Math.pow(i_ - sinusTrue[i1].x, 2) * (i_ - sinusTrue[i1 + 10].x) ) / Math.pow(h, 2)) * m[Math.floor(i/10) + 1]);
     	else S = sinusTrue[i].y;
     	uPolin.push(S);
-
     	ctx.fillRect(sinusTrue[i].x + off, off + (axisY.len / 2) + S, 5, 5);
 	}
 	
-	// for(let i = 0; i <= 100; i++){
-	// 	ctx.beginPath();
-	// 	ctx.moveTo(sinusTrue[i].x + off, uPolin[i] * n * cS + off + 2.5);
-	// 	ctx.lineTo((i + 1) * cS + off, uPolin[i + 1] * n * cS + off + 2.5);
-	// 	ctx.lineWidth = 1.5;
-	// 	ctx.strokeStyle = "blue";
-	// 	ctx.stroke();
-	// 	ctx.closePath();
-	// }
+	for(let i = 0; i < 100; i++){
+		ctx.beginPath();
+		ctx.moveTo(sinusTrue[i].x + off, off + (axisY.len / 2) + sinusTrue[i].y);
+		ctx.lineTo(sinusTrue[i + 1].x  + off, off + (axisY.len / 2) + sinusTrue[i + 1].y);
+		ctx.lineWidth = 1.5;
+		ctx.strokeStyle = "blue";
+		ctx.stroke();
+		ctx.closePath();
+	}
 }
 
 
@@ -151,10 +150,11 @@ window.onload = function(){
 	drawMarks();
 
 	//создание массива значений с шагом 
-	for(let i = 0; i <= n; i += stepSpline){
-		sinusSpline.push(sinusTrue[i]);
+	for(let i = 0; i <= n; i++){
+		if(i % 10 == 0){
+			sinusSpline.push(sinusTrue[i]);
+		}
 	}
-
 	drawSpline();
 
 }
