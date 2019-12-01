@@ -1,4 +1,3 @@
-
 <canvas id="canvas" width="1200" height="500"></canvas>
 <style>
 	canvas{
@@ -205,8 +204,8 @@
 
 		for (let j = 0; j < deg; j++) {
 			if (i != j) {
-				numerator *= x_in - j/deg;
-				denominator *= xi - j/deg;
+				numerator *= x_in - j/10;
+				denominator *= xi - j/10;
 			}
 		}
 		return numerator / denominator;
@@ -214,20 +213,20 @@
 
 	function calculateL (x_in, deg) {
 		let l = 0;
-		for (let i = 0; i < deg; i++) l += calculateP(x_in, i/deg, deg, i) * u[Math.floor(i*10)];
+		for (let i = 0; i < deg; i++) l += calculateP(x_in, i/10, deg, i) * u[Math.floor(i*10)];
 		return l;
 	}
 
 	let degree = 10,
 		uLagrPolin = new Array();
 
-	for (let counter = 0; counter <= 100; counter++) {
-		// if (counter % (counter/degree) != 0)
+	for (let counter = 0; counter <= degree*10; counter++) {
+		if (counter % 10 != 0)
 		uLagrPolin.push(calculateL(counter/100, degree));
-		// else uLagrPolin.push(u[counter]);  
+		else uLagrPolin.push(u[counter]);  
 	}
 
-	for(let i = 0; i <= 100; i++){
+	for(let i = 0; i <= degree*10; i++){
 		ctx.beginPath();
 		ctx.moveTo(i * cS + off, uLagrPolin[i] * n * cS + off + 2.5);
 		ctx.lineTo((i + 1) * cS + off, uLagrPolin[i + 1] * n * cS + off + 2.5);
