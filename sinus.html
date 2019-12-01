@@ -2,14 +2,23 @@
 <style>
 	canvas{
 		transform: rotate(180deg) rotateY(180deg);
+		margin: 50px;
 	}
 </style>
 
 
-
+<script>
+	
+	function inRad(num) {
+		return num * Math.PI / 180;
+	}
+</script>
 
 
 <script type="text/javascript">	
+
+//сделать подсчет функций !!ОТДЕЛЬНО!! чтобы можно было сделать клик отключения того или иного пострения и рисовать все в отдельных функциях
+//посмотреть шаг сплайна
 
 
 var canvas = document.getElementById('canvas');
@@ -23,119 +32,174 @@ function Coord(x, y){
 function Axle(len, step){
 	this.len = len;
 	this.step = step;
+	this.marks = new Array();
 }
-
 
 let h           = 0.01,
-	cS          = 11, //масштаб
+	cS          = 140, //масштаб
 	off         = 50, //смещение в пикселях
-	n           = 200,
+	n           = 400,
 	sinusTrue   = new Array(),
-	stepSpline  = 20,
-	sinusSpline = new Array();
+	sinusSpline = new Array(),
+	//оси	
+	axisX = new Axle(540, 50),
+	axisY = new Axle(200, 25);
 
-//оси
-let axisX = new Axle(1000, 20),
-	axisY = new Axle(200, 100);
-	
 
-function inRad(num) {
-	return num * Math.PI / 180;
+function calcTrueSinus(){
+	//первое значение
+	x = 0;
+	y = Math.sin(10 * x);
+	var coord = new Coord(x, y);
+	sinusTrue.push(coord);
+	console.log(sinusTrue[0]);
+
+	//остальные значения
+	for(i = 1; i <= n; i++) {
+  		x = sinusTrue[i - 1].x + h;
+		y = Math.sin(10 * x); 
+  		var coord = new Coord(x, y);
+  		sinusTrue.push(coord);
+	} 
 }
 
+
+function calcAxisMarks(){
+
+	//по y
+	let countY     = axisY.len / axisY.step,
+		stepSinusY = 0,
+		minMark    = 9999999,
+		maxMark    = -9999999;
+
+	for(let i = 0; i < n; i++){
+		if(minMark > sinusTrue[i].y){
+			minMark = sinusTrue[i].y;
+		}
+		if(maxMark < sinusTrue[i].y){
+			maxMark = sinusTrue[i].y;
+		}
+	}
+
+	stepSinusY = maxMark * 2 / countY;
+	axisY.marks.push(Number(minMark.toString().substring(0, 4)));
+
+	for(let i = 1; i < countY; i++){
+		var mark = axisY.marks[i - 1] + stepSinusY;
+		mark = mark.toString().substring(0, 4);
+		mark = Number(mark);
+		axisY.marks.push(mark);
+	}
+
+	//по x
+	let countX     = axisX.len / axisX.step,
+		stepSinusX = sinusTrue[n].x / countX,
+		firstMark  = sinusTrue[0].x;
+
+	axisX.marks.push(Number(firstMark.toString().substring(0, 4)));
+	for(let i = 1; i < countX; i++){
+		var mark = axisX.marks[i - 1] + stepSinusX;
+		mark = mark.toString().substring(0, 4);
+		mark = Number(mark);
+		axisX.marks.push(mark);
+	}
+
+	
+}
+
+
+function calcSplineSinus(){
+	let S = 0,
+		i_ = 0,
+		i1 = 0,
+		mN = n / 10,
+	    m = new Array();
+   		hSpline = 0.1;
+
+   	//наклоны
+	for(let i = 0; i <= mN; i++) m[i] = 0;
+    m[0] = (4 * sinusTrue[10].y - sinusTrue[20].y - 3 * sinusTrue[0].y ) / 2 * hSpline;
+	m[mN] = (3 * sinusTrue[n].y - sinusTrue[n - 20].y - 3 * sinusTrue[n - 10].y ) / 2 * hSpline;
+    for(let i = 1; i < mN; i++) m[i] = (sinusTrue[i * 10 + 10].y - sinusTrue[i * 10 - 10].y) / 2 * hSpline;
+
+    //значения функции
+   	for(let i = 0; i <= n; i++) {
+    	i1 = Math.floor(i / 10) * 10;
+    	i_ = i / 100;
+    	if (i % 10 != 0)
+    	S = (((( Math.pow(sinusTrue[i1 + 10].x - i_, 2) * (2 * (i_ - sinusTrue[i1].x) + hSpline) ) / Math.pow(hSpline, 3)) * sinusTrue[Math.floor(i / 10) * 10].y) + 
+    		((( Math.pow(i_ - sinusTrue[i1].x, 2) * (2 * (sinusTrue[i1 + 10].x - i_) + hSpline) ) / Math.pow(hSpline, 3)) * sinusTrue[Math.floor(i / 10) *  10 + 10].y) + 
+    		((( Math.pow(sinusTrue[i1 + 10].x - i_, 2) * (i_ - sinusTrue[i1].x) ) / Math.pow(hSpline, 2)) * m[Math.floor(i / 10)]) + 
+    		((( Math.pow(i_ - sinusTrue[i1].x, 2) * (i_ - sinusTrue[i1 + 10].x) ) / Math.pow(hSpline, 2)) * m[Math.floor(i / 10) + 1]  ) );
+    	else S = sinusTrue[i].y;
+    	var coord = new Coord(sinusTrue[i].x, S);
+    	sinusSpline.push(coord);
+	}
+}
+
+function calcSplineLagrange(){
+
+}
 
 function drawCinus(){
 	ctx.strokeStyle = "blue";
 	ctx.beginPath();
-
-	for (i = 0; i <= n; i++) {
-  		x = i * 3;
-  		y = 110 * Math.sin(12 * i / 180 * Math.PI);
-  		ctx.lineTo(off + x, off + (axisY.len / 2) + y);
-  		var coord = new Coord(x, y);
-  		sinusTrue.push(coord);
-  		console.log(coord);
-	}  
-
-	ctx.lineWidth = 5;
+	for(i = 0; i <= n; i++){
+		ctx.lineTo(off + sinusTrue[i].x * cS, off + (axisY.len / 2) + (sinusTrue[i].y * cS));
+	}
+	ctx.lineWidth = 3.5;
 	ctx.stroke();
 	ctx.closePath();
 }
 
 
+function drawAxisMarks(){
+	//x
+	for(let i = 0; i < axisX.marks.length; i++){
+		ctx.save();
+    	ctx.translate(axisX.marks[i] * cS + off + 5, off - 10 + (axisY.len / 2));
+    	ctx.rotate(inRad(180));
+    	ctx.scale(-1, 1)
+    	ctx.fillText(axisX.marks[i], 0, 0);
+    	ctx.restore();
+	}
+
+	//y
+	for(let i = 0; i < axisY.marks.length; i++){
+		if(!axisY.marks[i]){
+			continue;
+		}
+		ctx.save();
+    	ctx.translate(off - 30, off + cS * axisY.marks[i] + (axisY.len / 2));
+    	ctx.rotate(inRad(180));
+    	ctx.scale(-1, 1)
+    	ctx.fillText(axisY.marks[i], 0, 0);
+    	ctx.restore();
+	}
+	
+}
+
 function drawAxis(){
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 2;
 	ctx.beginPath();
 	ctx.moveTo(off, off + (axisY.len / 2));
     ctx.lineTo(axisX.len + (off * 2), off + (axisY.len / 2));
     ctx.stroke();
-    ctx.moveTo(off, off);
-    ctx.lineTo(off, axisY.len + (off * 4));
+    ctx.moveTo(off, off - (axisY.len / 2));
+    ctx.lineTo(off, axisY.len + (off * 2));
     ctx.stroke();
     ctx.closePath();
 }
 
 
-function drawMarks(){
-
-	let step = 0;
-	//по x 
-	for(let i = 0; i <= n; i += axisX.step){
-    	ctx.save();
-    	ctx.translate(off + sinusTrue[i].x, off - 10 + (axisY.len / 2));
-    	ctx.rotate(inRad(180));
-    	ctx.scale(-1, 1)
-    	ctx.fillText(sinusTrue[i].x, 0, 0);
-    	ctx.restore();
-    }
-
-    //перестроить
-    //по y
-    for(let i = 0; i <= n; i += axisY.step){
-    	ctx.save();
-    	ctx.translate(off - (off - 10), off + (axisY.len / 2) + sinusTrue[i].y);
-    	ctx.rotate(inRad(180));
-    	ctx.scale(-1, 1)
-    	ctx.fillText(sinusTrue[i].y.toString().substring(0, 6), 0, 0);
-    	ctx.restore();
-    }
-}
-
-
 function drawSpline(){
-	let S = 0,
-		i_ = 0,
-		i1 = 0,
-	    m = new Array(),
-	    uPolin = new Array();
-    	h = 0.1,
-    	step = n / 10;
-
-    for(let i = 0; i <= n; i++) m[i] = 0;
-    m[0] = (4 * sinusTrue[step].y - sinusTrue[step * 2].y - 3 * sinusTrue[0].y) / 2 * h;
-	m[10] = (3 * sinusTrue[n].y - sinusTrue[n - (step * 2)].y - 3 * sinusTrue[n - step].y) / 2 * h;
-
-    for(let i = 1; i < 10; i++) m[i] = (sinusTrue[i * step + step].y - sinusTrue[i * step - step].y) / 2 * h;
-
-    for(let i = 0; i <= n; i++){
-    	i1 = Math.floor(i / 10) * 10;
-    	i_ = i / 100;
-    	if (i % 10 != 0)
-    	S = (((Math.pow(sinusTrue[i1 + 10].x - i_, 2) * (2 * (i_ -sinusTrue[i1].x) + h)) / Math.pow(h, 3)) * sinusTrue[Math.floor(i/10)*10].y) + 
-    		(((Math.pow(i_ - sinusTrue[i1].x, 2) * (2 * (sinusTrue[i1 + 10].x - i_) + h)) / Math.pow(h, 3)) * sinusTrue[Math.floor(i/10)*10 + 10].y) + 
-    		(((Math.pow(sinusTrue[i1 + 10].x - i_, 2) * (i_ - sinusTrue[i1].x) ) / Math.pow(h, 2)) * m[Math.floor(i/10)]  ) + 
-    		(((Math.pow(i_ - sinusTrue[i1].x, 2) * (i_ - sinusTrue[i1 + 10].x) ) / Math.pow(h, 2)) * m[Math.floor(i/10) + 1]);
-    	else S = sinusTrue[i].y;
-    	uPolin.push(S);
-    	ctx.fillStyle = "red";
-    	ctx.fillRect(sinusTrue[i].x + off - 2.5, off + (axisY.len / 2) + S - 2.5, 5, 5);
-	}
-	
 	for(let i = 0; i < n; i++){
-		ctx.beginPath();
-		ctx.moveTo(sinusTrue[i].x + off, off + (axisY.len / 2) + sinusTrue[i].y);
-		ctx.lineTo(sinusTrue[i + 1].x  + off, off + (axisY.len / 2) + sinusTrue[i + 1].y);
-		ctx.lineWidth = 1.75;
 		ctx.strokeStyle = "red";
+		ctx.beginPath();
+		ctx.moveTo(off + sinusSpline[i].x * cS, off + (axisY.len / 2) + (sinusSpline[i].y * cS));
+		ctx.lineTo(off + sinusSpline[i + 1].x * cS, off + (axisY.len / 2) + (sinusSpline[i + 1].y * cS));
+		ctx.lineWidth = 2.4;
 		ctx.stroke();
 		ctx.closePath();
 	}
@@ -143,24 +207,19 @@ function drawSpline(){
 
 
 
-
 //точка входа
 window.onload = function(){
-	
-	drawAxis();
+
+	//считаем значения
+	calcTrueSinus();
+	calcAxisMarks();
+	calcSplineSinus();
+
+	//рисуем графики
 	drawCinus();
-	drawMarks();
-
-	//создание массива значений с шагом 
-	for(let i = 0; i <= n; i++){
-		if(i % 10 == 0){
-			sinusSpline.push(sinusTrue[i]);
-		}
-	}
 	drawSpline();
-
+	drawAxis();
+	drawAxisMarks();
 }
-
-
 
 </script>
