@@ -177,6 +177,7 @@
     		(  ( ( Math.pow(i_ - x[i1], 2) * (i_ - x[i1 + 10]) ) / Math.pow(h, 2)) * m[Math.floor(i/10) + 1]  ) );
     	else S = u[i];
     	uPolin.push(S);
+    	console.log(S);
 	}
 	
 	for(let i = 0; i <= 100; i++){
@@ -188,6 +189,7 @@
 		ctx.stroke();
 		ctx.closePath();
 	}
+
 		//строим отрезки
 		
 		// ctx.bezierCurveTo(50, 58, 160, 158, 160, 149);
@@ -195,6 +197,50 @@
 		// ctx.strokeStyle = "red";
 		// ctx.stroke();
 		// ctx.closePath();
+
+	//================================ПОЛИНОМ ЛАГРАНЖА================================
+	function calculateP (x1, xi, n1, i) {
+		let numerator = 1,
+		    denominator = 1;
+
+		for (let j = 0; j < n1; j++) {
+			if (xi != j/10) {
+				numerator *= x1 - j/10;
+				denominator *= xi - j/10;
+			}
+		}
+		console.log("P1 = " + numerator + "   P2 = " + denominator);
+		console.log("P = " + (numerator / denominator));
+		return numerator / denominator;
+	}
+
+	function calculateL (x2, xi, yi, n1) {
+		let l = 0;
+		for (let i = 0; i < n1; i++) l += calculateP(x2, xi, n1, i) * yi;
+		return l;
+	}
+
+	let degree = 10,
+		uLagrPolin = new Array();
+
+	for (let counter = 0; counter <= degree*10; counter++) {
+		if (counter % 10 != 0)
+		uLagrPolin.push(calculateL(counter/100, Math.floor(counter/10)/10, u[Math.floor(counter/10)*10], degree));
+		else uLagrPolin.push(u[counter]);
+		// console.log("l = " + uLagrPolin[counter]);
+	}
+
+	for(let i = 0; i <= degree*10; i++){
+		ctx.beginPath();
+		ctx.moveTo(i * cS + off, uLagrPolin[i] * n * cS + off + 2.5);
+		ctx.lineTo((i + 1) * cS + off, uLagrPolin[i + 1] * n * cS + off + 2.5);
+		ctx.lineWidth = 1.5;
+		ctx.strokeStyle = "green";
+		ctx.stroke();
+		ctx.closePath();
+	}
+
+
 
 </script>
 
