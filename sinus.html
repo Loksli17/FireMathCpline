@@ -1,9 +1,53 @@
-<canvas id="canvas" width="1200" height="500"></canvas>
+<div class="wrap">
+	<canvas id="canvas" width="800" height="320"></canvas>
+	<div>
+		<div class="button" id="true">Точное решение</div>
+		<div class="button" id="spline">Сплайн</div>
+		<div class="button" id="lagrange">Лагранж</div>
+	</div>
+	
+</div>
+
+
 <style>
 	canvas{
 		transform: rotate(180deg) rotateY(180deg);
-		margin: 50px;
+		margin-right: 20px;
+		padding: 50px;
+		box-shadow: inset -3px -1px 20px -6px rgba(0,0,0,0.75);
 	}
+
+	.wrap{
+		display: flex;
+		margin: 30px;
+	}
+
+	.button{
+		padding: 7px 10px;
+		border: 1.5px solid #000;
+		margin-top: 20px;
+		font-size: 18px;
+		max-width: 100px;
+		text-align: center;
+	}
+
+	.button:first-child{
+		margin-top: 0px;
+	}
+
+	.button:hover{
+		transition: 0.3s;
+		background: #000;
+		color: #fff;
+		cursor: pointer;
+	}
+
+	.active{
+		transition: 0.3s;
+		background: #000;
+		color: #fff;
+	}
+
 </style>
 
 
@@ -35,12 +79,13 @@ function Axle(len, step){
 	this.marks = new Array();
 }
 
-let h           = 0.01,
-	cS          = 140, //масштаб
-	off         = 50, //смещение в пикселях
-	n           = 400,
-	sinusTrue   = new Array(),
-	sinusSpline = new Array(),
+let h             = 0.01,
+	cS            = 140, //масштаб
+	off           = 50, //смещение в пикселях
+	n             = 400,
+	sinusTrue     = new Array(),
+	sinusSpline   = new Array(),
+	sinusLagrange = new Array(),
 	//оси	
 	axisX = new Axle(540, 50),
 	axisY = new Axle(200, 25);
@@ -60,7 +105,7 @@ function calcTrueSinus(){
 		y = Math.sin(10 * x); 
   		var coord = new Coord(x, y);
   		sinusTrue.push(coord);
-	} 
+	}
 }
 
 
@@ -103,7 +148,6 @@ function calcAxisMarks(){
 		mark = Number(mark);
 		axisX.marks.push(mark);
 	}
-
 	
 }
 
@@ -137,9 +181,44 @@ function calcSplineSinus(){
 	}
 }
 
+
 function calcSplineLagrange(){
 
+	function calculateP (x_in, xi, deg, i) {
+		let numerator = 1,
+		    denominator = 1;
+
+		for (let j = 0; j < deg; j++) {
+			if (i != j) {
+				numerator *= x_in - j / 10;
+				denominator *= xi - j / 10;
+			}
+		}
+		return numerator / denominator;
+	}
+
+	function calculateL(x_in, deg){
+		let l = 0;
+		for (let i = 0; i < deg; i++) l += calculateP(x_in, i / 10, deg, i) * sinusTrue[Math.floor(i * 10)].y;
+		return l;
+	}
+
+	let degree = 40;
+
+	for (let counter = 0; counter <= degree * 10; counter++) {
+		if (counter % 10 != 0){
+			var x = counter / 100,
+				y = calculateL(counter / 100, degree);
+			var coord = new Coord(x, y);
+			sinusLagrange.push(coord);
+		}else{
+			sinusLagrange.push(sinusTrue[counter]);
+		}  
+	}
+
+	console.log(sinusLagrange);
 }
+
 
 function drawCinus(){
 	ctx.strokeStyle = "blue";
@@ -179,6 +258,7 @@ function drawAxisMarks(){
 	
 }
 
+
 function drawAxis(){
 	ctx.strokeStyle = "black";
 	ctx.lineWidth = 2;
@@ -206,6 +286,102 @@ function drawSpline(){
 }
 
 
+function drawSplineLagrange(){
+for(let i = 0; i < n; i++){
+		ctx.strokeStyle = "green";
+		ctx.beginPath();
+		ctx.moveTo(off + sinusLagrange[i].x * cS, off + (axisY.len / 2) + (sinusLagrange[i].y * cS));
+		ctx.lineTo(off + sinusLagrange[i + 1].x * cS, off + (axisY.len / 2) + (sinusLagrange[i + 1].y * cS));
+		ctx.lineWidth = 2.4;
+		ctx.stroke();
+		ctx.closePath();
+	}
+}
+
+
+
+
+let flags = {
+	sinusTrue    : true,
+	sinusSpline  : true,
+	sinusLagrange: true,
+}
+
+function minusTrue(){
+	ctx.clearRect(0, 0, 800, 320);
+
+	if(!flags.sinusTrue){
+		drawCinus();
+		flags.sinusTrue = true;
+		this.classList.remove("active");
+	}else{
+		flags.sinusTrue = false;
+		this.classList.add("active");
+	}
+
+	if(flags.sinusSpline){
+		drawSpline();
+	}
+
+	if(flags.sinusLagrange){
+		drawSplineLagrange();
+	}
+	
+	drawAxis();
+	drawAxisMarks();
+
+}
+
+
+function minusSpline(){
+	ctx.clearRect(0, 0, 800, 320);
+
+	if(flags.sinusTrue){
+		drawCinus();
+	}
+
+	if(!flags.sinusSpline){
+		drawSpline();
+		flags.sinusSpline = true;
+		this.classList.remove("active");
+	}else{
+		flags.sinusSpline = false;
+		this.classList.add("active");
+	}
+
+	if(flags.sinusLagrange){
+		drawSplineLagrange();
+	}
+	
+	drawAxis();
+	drawAxisMarks();
+}
+
+
+function minusLagrange(){
+	ctx.clearRect(0, 0, 800, 320);
+
+	if(flags.sinusTrue){
+		drawCinus();
+	}
+
+	if(flags.sinusSpline){
+		drawSpline();
+	}
+
+	if(!flags.sinusLagrange){
+		drawSplineLagrange();
+		flags.sinusLagrange = true;
+		this.classList.remove("active");
+	}else{
+		flags.sinusLagrange = false;
+		this.classList.add("active");
+	}
+	
+	drawAxis();
+	drawAxisMarks();
+}
+
 
 //точка входа
 window.onload = function(){
@@ -214,12 +390,21 @@ window.onload = function(){
 	calcTrueSinus();
 	calcAxisMarks();
 	calcSplineSinus();
+	calcSplineLagrange();
 
 	//рисуем графики
 	drawCinus();
 	drawSpline();
+	drawSplineLagrange();
 	drawAxis();
 	drawAxisMarks();
+
+
+	document.getElementById('true').addEventListener('click', minusTrue, false);
+	document.getElementById('spline').addEventListener('click', minusSpline, false);
+	document.getElementById('lagrange').addEventListener('click', minusLagrange, false);
+
+	
 }
 
 </script>
