@@ -198,7 +198,6 @@
 		// ctx.closePath();
 
 	//================================ПОЛИНОМ ЛАГРАНЖА================================
-	let flag = false;
 	function calculateP (x_in, xi, deg, i) {
 		let numerator = 1,
 		    denominator = 1;
@@ -207,7 +206,6 @@
 			if (i != j) {
 				numerator *= x_in - j/10;
 				denominator *= xi - j/10;
-				// if (j == 3 && flag == true) console.log(numerator / denominator);
 			}
 		}
 		return numerator / denominator;
@@ -215,10 +213,7 @@
 
 	function calculateL (x_in, deg) {
 		let l = 0;
-		for (let i = 0; i < deg; i++) {
-			l += calculateP(x_in, i/10, deg, i) * u[Math.floor(i*10)];
-			if (flag == true) console.log(u[Math.floor(i*10)] + " and " + l + " and " + calculateP(x_in, i/10, deg, i));
-		}
+		for (let i = 0; i < deg; i++) l += calculateP(x_in, i/10, deg, i) * u[Math.floor(i*10)];
 		return l;
 	}
 
@@ -226,23 +221,16 @@
 		uLagrPolin = new Array();
 
 	for (let counter = 0; counter <= degree*10; counter++) {
-		if (counter == 55) flag = true;
-		else flag = false;
 		if (counter % 10 != 0)
 		uLagrPolin.push(calculateL(counter/100, degree));
 		else uLagrPolin.push(u[counter]);  
-		console.log("l = " + uLagrPolin[counter]);
-		if (counter == 7) console.log(uLagrPolin[counter]);
-		if (counter == 16) console.log(uLagrPolin[counter]);
-		if (counter == 53) console.log(uLagrPolin[counter]);
-		if (counter == 89) console.log(uLagrPolin[counter]);
 	}
 
 	for(let i = 0; i <= degree*10; i++){
 		ctx.beginPath();
 		ctx.moveTo(i * cS + off, uLagrPolin[i] * n * cS + off + 2.5);
 		ctx.lineTo((i + 1) * cS + off, uLagrPolin[i + 1] * n * cS + off + 2.5);
-		ctx.lineWidth = 1.5;
+		ctx.lineWidth = 2;
 		ctx.strokeStyle = "green";
 		ctx.stroke();
 		ctx.closePath();
