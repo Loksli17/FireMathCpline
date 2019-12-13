@@ -80,17 +80,28 @@
 
 	function calcFunc(){
 		func = [
+			// new Coord(0, 10),
+			// new Coord(10, 30),
+			// new Coord(20, 18),
+			// new Coord(30, 30),
+			// new Coord(40, 40),
+			// new Coord(50, 35),
+			// new Coord(60, 22),
+			// new Coord(70, 28),
+			// new Coord(80, 60),
+			// new Coord(90, 70),
+			// new Coord(100, 16),
 			new Coord(0, 10),
-			new Coord(10, 30),
-			new Coord(20, 18),
-			new Coord(30, 30),
-			new Coord(40, 40),
+			new Coord(10, 15),
+			new Coord(20, 20),
+			new Coord(30, 25),
+			new Coord(40, 30),
 			new Coord(50, 35),
-			new Coord(60, 22),
-			new Coord(70, 28),
-			new Coord(80, 60),
-			new Coord(90, 70),
-			new Coord(100, 16),
+			new Coord(60, 40),
+			new Coord(70, 45),
+			new Coord(80, 50),
+			new Coord(90, 55),
+			new Coord(100, 60)
 		];
 
 		n = func.length * 10;
@@ -119,7 +130,6 @@
    		for(let i = 0; i <= 100; i++) {
     		i1 = Math.floor(i / 10);
     		if (i % 10 != 0)
-
     		S = (((( Math.pow(func[i1 + 1].x - i, 2) * (2 * (i - func[i1].x) + hSpline) ) / Math.pow(hSpline, 3)) * func[i1].y) + 
     			((( Math.pow(i - func[i1].x, 2) * (2 * (func[i1 + 1].x - i) + hSpline)) / Math.pow(hSpline, 3)) * func[i1 + 1].y) + 
     			((( Math.pow(func[i1 + 1].x - i, 2) * (i - func[i1].x) ) / Math.pow(hSpline, 2)) * m[i1]) + 
@@ -213,7 +223,7 @@
 		//строим
 		drawAxis();
 		drawFuncSpline(funcLagrange, "red");
-		// drawFuncSpline(funcSpline, "blue");
+		drawFuncSpline(funcSpline, "blue");
 		drawFunc();
 	}
 
