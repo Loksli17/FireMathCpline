@@ -1,0 +1,220 @@
+<div class="wrap">
+	<canvas id="canvas" width="800" height="550"></canvas>
+	<div>
+		<div class="button" id="true">Точное решение</div>
+		<div class="button" id="spline">Сплайн</div>
+		<div class="button" id="lagrange">Лагранж</div>
+	</div>
+</div>
+
+
+<style>
+	canvas{
+		transform: rotate(180deg) rotateY(180deg);
+		margin-right: 20px;
+		padding: 20px;
+		box-shadow: inset -3px -1px 20px -6px rgba(0,0,0,0.75);
+	}
+
+	.wrap{
+		display: flex;
+		margin: 30px;
+	}
+
+	.button{
+		padding: 7px 10px;
+		border: 1.5px solid #000;
+		margin-top: 20px;
+		font-size: 18px;
+		max-width: 100px;
+		text-align: center;
+	}
+
+	.button:first-child{
+		margin-top: 0px;
+	}
+
+	.button:hover{
+		transition: 0.3s;
+		background: #000;
+		color: #fff;
+		cursor: pointer;
+	}
+
+	.active{
+		transition: 0.3s;
+		background: #000;
+		color: #fff;
+	}
+
+</style>
+
+
+<script type="text/javascript">
+	
+	var canvas = document.getElementById('canvas');
+	var ctx = canvas.getContext("2d");
+
+	function Coord(x, y){
+		this.x = x;
+		this.y = y;
+	};
+
+	function Axle(len, step){
+		this.len = len;
+		this.step = step;
+		this.marks = new Array();
+	}
+
+
+	let h            = 1,
+		cS           = 4.5, //масштаб
+		off          = 50, //смещение в пикселях
+		func         = new Array(),
+		funcSpline   = new Array(),
+		funcLagrange = new Array(),
+		//оси	
+		axisX = new Axle(540, 50),
+		axisY = new Axle(600, 25);
+
+
+	function calcFunc(){
+		func = [
+			new Coord(0, 10),
+			new Coord(10, 30),
+			new Coord(20, 18),
+			new Coord(30, 30),
+			new Coord(40, 40),
+			new Coord(50, 35),
+			new Coord(60, 22),
+			new Coord(70, 28),
+			new Coord(80, 60),
+			new Coord(90, 70),
+			new Coord(100, 16),
+		];
+
+		n = func.length * 10;
+		console.log(func);
+	}
+
+
+	function calcSpline(){
+		let S = 0,
+			i_ = 0,
+			i1 = 0,
+			mN = 10,
+	    	m = new Array();
+   			hSpline = 10;
+
+   		//наклоны
+		for(let i = 0; i <= mN; i++) m[i] = 0;
+    	m[0] = (4 * func[1].y - func[2].y - 3 * func[0].y) / 2 * hSpline;
+		m[mN] = (3 * func[10].y + func[8].y - 4 * func[9].y) / 2 * hSpline;
+
+    	for(let i = 1; i < mN; i++){
+    		m[i] = (func[i + 1].y - func[i - 1].y) / 2 * hSpline;
+    	}
+
+    	//значения функции
+   		for(let i = 0; i <= 100; i++) {
+    		i1 = Math.floor(i / 10);
+    		if (i % 10 != 0)
+
+    		S = (((( Math.pow(func[i1 + 1].x - i, 2) * (2 * (i - func[i1].x) + hSpline) ) / Math.pow(hSpline, 3)) * func[i1].y) + 
+    			((( Math.pow(i - func[i1].x, 2) * (2 * (func[i1 + 1].x - i) + hSpline)) / Math.pow(hSpline, 3)) * func[i1 + 1].y) + 
+    			((( Math.pow(func[i1 + 1].x - i, 2) * (i - func[i1].x) ) / Math.pow(hSpline, 2)) * m[i1]) + 
+    			((( Math.pow(i - func[i1].x, 2) * (i - func[i1 + 1].x) ) / Math.pow(hSpline, 2)) * m[i1 + 1]));
+    		else S = func[i1].y;
+
+    		var coord = new Coord(i, S);
+    		console.log(coord);
+    		funcSpline.push(coord);
+		}
+		
+	}
+
+
+	function calcLagrange(){
+
+		let degree = func.length - 1;
+
+		function calcP(x, i, deg){
+			let num = 1,
+				dem = 1;
+
+			for(let j = 0; j < deg; j++){
+				if(j != i){
+					num *= x - func[j].x;
+					dem *= func[i].x - func[j].x;
+				}
+			}
+
+			return num / dem;
+		}
+
+		function calcL(x, deg){
+			let l = 0;
+			for(let i = 0; i < deg; i++){
+				l += calcP(x, i, deg) * func[i].y;
+			}
+			return l;
+		}
+
+		for(let x = 0; x <= n; x++){
+			let y = calcL(x, degree);
+			var coord = new Coord(x, y);
+			funcLagrange.push(coord);
+		}
+	}
+
+
+	function drawFunc(){
+		ctx.fillStyle = 'green';
+		for(let i = 0; i < func.length; i++){
+			ctx.fillRect(func[i].x * 1.5 * cS + off, func[i].y * cS + off, 5, 5);
+		}	
+	}
+
+
+	function drawFuncSpline(arr, color){
+		for(let i = 0; i < n; i++){
+			ctx.strokeStyle = color;
+			ctx.beginPath();
+			ctx.moveTo(off + arr[i].x * 1.5 * cS, off + arr[i].y * cS);
+			ctx.lineTo(off + arr[i + 1].x * 1.5 * cS, off + arr[i + 1].y * cS);
+			ctx.lineWidth = 2.4;
+			ctx.stroke();
+			ctx.closePath();
+		}
+	}
+
+
+	function drawAxis(){
+		ctx.strokeStyle = "black";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.moveTo(off, off);
+    	ctx.lineTo(axisX.len + (off * 2), off);
+    	ctx.stroke();
+    	ctx.moveTo(off, off);
+    	ctx.lineTo(off, axisY.len + (off * 2));
+    	ctx.stroke();
+    	ctx.closePath();
+	}
+
+
+
+	window.onload = () => {
+		//вычисления
+		calcFunc();
+		calcSpline();
+		calcLagrange();
+
+		//строим
+		drawAxis();
+		drawFuncSpline(funcLagrange, "red");
+		// drawFuncSpline(funcSpline, "blue");
+		drawFunc();
+	}
+
+</script>

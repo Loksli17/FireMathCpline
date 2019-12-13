@@ -5,7 +5,6 @@
 		<div class="button" id="spline">Сплайн</div>
 		<div class="button" id="lagrange">Лагранж</div>
 	</div>
-	
 </div>
 
 
@@ -82,12 +81,12 @@ function Axle(len, step){
 let h             = 0.01,
 	cS            = 140, //масштаб
 	off           = 50, //смещение в пикселях
-	n             = 400,
+	n             = 280,
 	sinusTrue     = new Array(),
 	sinusSpline   = new Array(),
 	sinusLagrange = new Array(),
 	//оси	
-	axisX = new Axle(540, 50),
+	axisX = new Axle(540, 120),
 	axisY = new Axle(200, 25);
 
 
@@ -97,7 +96,6 @@ function calcTrueSinus(){
 	y = Math.sin(10 * x);
 	var coord = new Coord(x, y);
 	sinusTrue.push(coord);
-	console.log(sinusTrue[0]);
 
 	//остальные значения
 	for(i = 1; i <= n; i++) {
@@ -153,11 +151,11 @@ function calcAxisMarks(){
 
 
 function calcSplineSinus(){
-	let S = 0,
+	let S  = 0,
 		i_ = 0,
 		i1 = 0,
 		mN = n / 10,
-	    m = new Array();
+	    m  = new Array();
    		hSpline = 0.1;
 
    	//наклоны
@@ -175,7 +173,9 @@ function calcSplineSinus(){
     		((( Math.pow(i_ - sinusTrue[i1].x, 2) * (2 * (sinusTrue[i1 + 10].x - i_) + hSpline) ) / Math.pow(hSpline, 3)) * sinusTrue[Math.floor(i / 10) *  10 + 10].y) + 
     		((( Math.pow(sinusTrue[i1 + 10].x - i_, 2) * (i_ - sinusTrue[i1].x) ) / Math.pow(hSpline, 2)) * m[Math.floor(i / 10)]) + 
     		((( Math.pow(i_ - sinusTrue[i1].x, 2) * (i_ - sinusTrue[i1 + 10].x) ) / Math.pow(hSpline, 2)) * m[Math.floor(i / 10) + 1]  ) );
-    	else S = sinusTrue[i].y;
+    	else{
+    		S = sinusTrue[i].y;
+    	} 
     	var coord = new Coord(sinusTrue[i].x, S);
     	sinusSpline.push(coord);
 	}
@@ -184,39 +184,35 @@ function calcSplineSinus(){
 
 function calcSplineLagrange(){
 
-	function calculateP (x_in, xi, deg, i) {
-		let numerator = 1,
-		    denominator = 1;
+	let degree = 10;
 
-		for (let j = 0; j < deg; j++) {
-			if (i != j) {
-				numerator *= x_in - j / 10;
-				denominator *= xi - j / 10;
+	function calcP(x, i, deg){
+		let num = 1,
+			dem = 1;
+
+		for(let j = 0; j < deg; j++){
+			if(j != i){
+				num *= x - sinusTrue[j * 10].x;
+				dem *= sinusTrue[i * 10].x - sinusTrue[j * 10].x;
 			}
 		}
-		return numerator / denominator;
+		return num / dem;
 	}
 
-	function calculateL(x_in, deg){
+	function calcL(x, deg){
 		let l = 0;
-		for (let i = 0; i < deg; i++) l += calculateP(x_in, i / 10, deg, i) * sinusTrue[Math.floor(i * 10)].y;
+		for(let i = 0; i < deg; i++){
+			console.log(sinusTrue[i * 10], i * 10);
+			l += calcP(x, i, deg) * sinusTrue[i * 10].y;
+		}
 		return l;
 	}
 
-	let degree = 40;
-
-	for (let counter = 0; counter <= degree * 10; counter++) {
-		if (counter % 10 != 0){
-			var x = counter / 100,
-				y = calculateL(counter / 100, degree);
-			var coord = new Coord(x, y);
-			sinusLagrange.push(coord);
-		}else{
-			sinusLagrange.push(sinusTrue[counter]);
-		}  
+	for(let x = 0; x <= n; x++){
+		let y = calcL(x / 100, degree);
+		var coord = new Coord(x / 100, y);
+		sinusLagrange.push(coord);
 	}
-
-	console.log(sinusLagrange);
 }
 
 
@@ -287,7 +283,7 @@ function drawSpline(){
 
 
 function drawSplineLagrange(){
-for(let i = 0; i < n; i++){
+	for(let i = 0; i < sinusLagrange.length - 1; i++){
 		ctx.strokeStyle = "green";
 		ctx.beginPath();
 		ctx.moveTo(off + sinusLagrange[i].x * cS, off + (axisY.len / 2) + (sinusLagrange[i].y * cS));
@@ -297,8 +293,6 @@ for(let i = 0; i < n; i++){
 		ctx.closePath();
 	}
 }
-
-
 
 
 let flags = {
@@ -392,6 +386,8 @@ window.onload = function(){
 	calcSplineSinus();
 	calcSplineLagrange();
 
+	console.log(sinusTrue, sinusLagrange);
+
 	//рисуем графики
 	drawCinus();
 	drawSpline();
@@ -399,11 +395,9 @@ window.onload = function(){
 	drawAxis();
 	drawAxisMarks();
 
-
 	document.getElementById('true').addEventListener('click', minusTrue, false);
 	document.getElementById('spline').addEventListener('click', minusSpline, false);
 	document.getElementById('lagrange').addEventListener('click', minusLagrange, false);
-
 	
 }
 
