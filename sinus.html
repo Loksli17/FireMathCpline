@@ -1,5 +1,5 @@
 <div class="wrap">
-	<canvas id="canvas" width="800" height="320"></canvas>
+	<canvas id="canvas" width="800" height="700"></canvas>
 	<div>
 		<div class="button" id="true">Точное решение</div>
 		<div class="button" id="spline">Сплайн</div>
@@ -79,10 +79,12 @@ function Axle(len, step){
 }
 
 let h             = 0.01,
-	cS            = 140, //масштаб
+	cS            = 110, //масштаб
 	off           = 50, //смещение в пикселях
-	n             = 280,
+	n             = 320,
+	nDisc         = 0,
 	sinusTrue     = new Array(),
+	sinusDisc     = new Array(),
 	sinusSpline   = new Array(),
 	sinusLagrange = new Array(),
 	//оси	
@@ -93,17 +95,36 @@ let h             = 0.01,
 function calcTrueSinus(){
 	//первое значение
 	x = 0;
-	y = Math.sin(10 * x);
+	y = Math.cos(10 * x);
 	var coord = new Coord(x, y);
 	sinusTrue.push(coord);
 
 	//остальные значения
 	for(i = 1; i <= n; i++) {
   		x = sinusTrue[i - 1].x + h;
-		y = Math.sin(10 * x); 
+		y = Math.cos(10 * x); 
   		var coord = new Coord(x, y);
   		sinusTrue.push(coord);
 	}
+}
+
+
+function calcDiscSinus(){
+	sinusDisc = [
+		new Coord(0, 1),
+		new Coord(0.3100000000000001, -1),
+		new Coord(0.6300000000000003, 1),
+		new Coord(0.9400000000000006, -1),
+		new Coord(1.260000000000001, 1),
+		new Coord(1.5700000000000012, -1),
+		new Coord(1.8800000000000014, 1),
+		new Coord(2.199999999999997, -1),
+		new Coord(2.5099999999999905, 1),
+		new Coord(2.8299999999999836, -1),
+		new Coord(3.139999999999977, 1)
+	];
+
+	nDisc = sinusDisc.length;
 }
 
 
@@ -162,7 +183,10 @@ function calcSplineSinus(){
 	for(let i = 0; i <= mN; i++) m[i] = 0;
     m[0] = (4 * sinusTrue[10].y - sinusTrue[20].y - 3 * sinusTrue[0].y ) / 2 * hSpline;
 	m[mN] = (3 * sinusTrue[n].y - sinusTrue[n - 20].y - 3 * sinusTrue[n - 10].y ) / 2 * hSpline;
-    for(let i = 1; i < mN; i++) m[i] = (sinusTrue[i * 10 + 10].y - sinusTrue[i * 10 - 10].y) / 2 * hSpline;
+    for(let i = 1; i < mN; i++){
+    	console.log(sinusTrue[i * 10 + 10].y, i * 10 + 10);
+    	m[i] = (sinusTrue[i * 10 + 10].y - sinusTrue[i * 10 - 10].y) / 2 * hSpline;
+    }
 
     //значения функции
    	for(let i = 0; i <= n; i++) {
@@ -181,10 +205,48 @@ function calcSplineSinus(){
 	}
 }
 
+// function calcSplineSinus(){
+// 	let S  = 0,
+// 		i_ = 0,
+// 	    m  = new Array();
+//    		hSpline = 0.31;
+
+//    	//наклоны
+// 	for(let i = 0; i <= nDisc; i++) m[i] = 0;
+//     m[0] = (4 * sinusDisc[1].y - sinusDisc[2].y - 3 * sinusDisc[0].y ) / 2 * hSpline;
+// 	m[nDisc] = (3 * sinusDisc[nDisc - 1].y - sinusDisc[nDisc - 3].y - 3 * sinusDisc[nDisc - 2].y ) / 2 * hSpline;
+//     for(let i = 1; i < nDisc - 1; i++) m[i] = (sinusDisc[i + 1].y - sinusDisc[i - 1].y) / 2 * hSpline;
+
+//     //значения функции
+//    	for(let i = 0; i < n - n / nDisc; i++) {
+
+//    		for(let j = 0; j < nDisc; j++){
+//    			if(sinusTrue[i].x <= sinusDisc[j].x){
+//    				var i1 = j;
+//    				break;
+//    			}
+//    		}
+
+//    		if(i1 == nDisc - 1){
+//    			break;
+//    		}
+//    		console.log(i1, nDisc);
+
+//     	i_ = i / 100;
+//     	S = (((( Math.pow(sinusDisc[i1 + 1].x - i_, 2) * (2 * (i_ - sinusDisc[i1].x) + hSpline) ) / Math.pow(hSpline, 3)) * sinusDisc[i1].y) + 
+//     		((( Math.pow(i_ - sinusDisc[i1].x, 2) * (2 * (sinusDisc[i1 + 1].x - i_) + hSpline) ) / Math.pow(hSpline, 3)) * sinusDisc[i1 + 1].y) + 
+//     		((( Math.pow(sinusDisc[i1 + 1].x - i_, 2) * (i_ - sinusDisc[i1].x) ) / Math.pow(hSpline, 2)) * m[i1]) + 
+//     		((( Math.pow(i_ - sinusDisc[i1].x, 2) * (i_ - sinusDisc[i1 + 1].x) ) / Math.pow(hSpline, 2)) * m[i1 + 1]  ) );
+
+//     	var coord = new Coord(sinusTrue[i].x, S);
+//     	sinusSpline.push(coord);
+// 	}
+// }
+
 
 function calcSplineLagrange(){
 
-	let degree = 10;
+	let degree = 7;
 
 	function calcP(x, i, deg){
 		let num = 1,
@@ -192,8 +254,8 @@ function calcSplineLagrange(){
 
 		for(let j = 0; j < deg; j++){
 			if(j != i){
-				num *= x - sinusTrue[j * 10].x;
-				dem *= sinusTrue[i * 10].x - sinusTrue[j * 10].x;
+				num *= x - sinusDisc[j].x;
+				dem *= sinusDisc[i].x - sinusDisc[j].x;
 			}
 		}
 		return num / dem;
@@ -202,8 +264,7 @@ function calcSplineLagrange(){
 	function calcL(x, deg){
 		let l = 0;
 		for(let i = 0; i < deg; i++){
-			console.log(sinusTrue[i * 10], i * 10);
-			l += calcP(x, i, deg) * sinusTrue[i * 10].y;
+			l += calcP(x, i, deg) * sinusDisc[i].y;
 		}
 		return l;
 	}
@@ -216,7 +277,7 @@ function calcSplineLagrange(){
 }
 
 
-function drawCinus(){
+function drawSinus(){
 	ctx.strokeStyle = "blue";
 	ctx.beginPath();
 	for(i = 0; i <= n; i++){
@@ -225,6 +286,14 @@ function drawCinus(){
 	ctx.lineWidth = 3.5;
 	ctx.stroke();
 	ctx.closePath();
+}
+
+
+function drawSinusDisc(){
+	ctx.fillStyle = 'red';
+	for(let i = 0; i < sinusDisc.length; i++){
+		ctx.fillRect(sinusDisc[i].x * cS + off - 2.5, sinusDisc[i].y * cS + off + (axisY.len / 2) - 2.5, 5, 5);
+	}	
 }
 
 
@@ -270,7 +339,8 @@ function drawAxis(){
 
 
 function drawSpline(){
-	for(let i = 0; i < n; i++){
+	for(let i = 0; i < sinusSpline.length - 1; i++){
+
 		ctx.strokeStyle = "red";
 		ctx.beginPath();
 		ctx.moveTo(off + sinusSpline[i].x * cS, off + (axisY.len / 2) + (sinusSpline[i].y * cS));
@@ -302,10 +372,10 @@ let flags = {
 }
 
 function minusTrue(){
-	ctx.clearRect(0, 0, 800, 320);
+	ctx.clearRect(0, 0, 2000, 2000);
 
 	if(!flags.sinusTrue){
-		drawCinus();
+		drawSinus();
 		flags.sinusTrue = true;
 		this.classList.remove("active");
 	}else{
@@ -328,10 +398,10 @@ function minusTrue(){
 
 
 function minusSpline(){
-	ctx.clearRect(0, 0, 800, 320);
+	ctx.clearRect(0, 0, 2000, 2000);
 
 	if(flags.sinusTrue){
-		drawCinus();
+		drawSinus();
 	}
 
 	if(!flags.sinusSpline){
@@ -353,10 +423,10 @@ function minusSpline(){
 
 
 function minusLagrange(){
-	ctx.clearRect(0, 0, 800, 320);
+	ctx.clearRect(0, 0, 2000, 2000);
 
 	if(flags.sinusTrue){
-		drawCinus();
+		drawSinus();
 	}
 
 	if(flags.sinusSpline){
@@ -382,14 +452,15 @@ window.onload = function(){
 
 	//считаем значения
 	calcTrueSinus();
+	calcDiscSinus();
 	calcAxisMarks();
 	calcSplineSinus();
 	calcSplineLagrange();
 
-	console.log(sinusTrue, sinusLagrange);
+	console.log(sinusSpline, sinusTrue);
 
 	//рисуем графики
-	drawCinus();
+	drawSinus();
 	drawSpline();
 	drawSplineLagrange();
 	drawAxis();
