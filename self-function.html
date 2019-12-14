@@ -1,9 +1,15 @@
 <div class="wrap">
 	<canvas id="canvas" width="800" height="550"></canvas>
+	<input type = "range" id="zoom">
 	<div>
+		<div class="button" id="rezoom">Перестроить график</div>
 		<div class="button" id="true">Точное решение</div>
 		<div class="button" id="spline">Сплайн</div>
 		<div class="button" id="lagrange">Лагранж</div>
+
+		<div class="button" id="dn1">Дискретный набор 1</div>
+		<div class="button" id="dn2">Дискретный набор 2</div>
+		<div class="button" id="dn3">Дискретный набор 3</div>
 	</div>
 </div>
 
@@ -13,7 +19,11 @@
 		transform: rotate(180deg) rotateY(180deg);
 		margin-right: 20px;
 		padding: 20px;
-		box-shadow: inset -3px -1px 20px -6px rgba(0,0,0,0.75);
+		/*box-shadow: inset -3px -1px 20px -6px rgba(0,0,0,0.75);*/
+	}
+
+	.range{
+
 	}
 
 	.wrap{
@@ -54,6 +64,7 @@
 	
 	var canvas = document.getElementById('canvas');
 	var ctx = canvas.getContext("2d");
+	let globalMode = 1;
 
 	function Coord(x, y){
 		this.x = x;
@@ -68,7 +79,7 @@
 
 
 	let h            = 1,
-		cS           = 4.5, //масштаб
+		cS 			 = 1,
 		off          = 50, //смещение в пикселях
 		func         = new Array(),
 		funcSpline   = new Array(),
@@ -77,35 +88,56 @@
 		axisX = new Axle(540, 50),
 		axisY = new Axle(600, 25);
 
+		
 
-	function calcFunc(){
-		func = [
-			// new Coord(0, 10),
-			// new Coord(10, 30),
-			// new Coord(20, 18),
-			// new Coord(30, 30),
-			// new Coord(40, 40),
-			// new Coord(50, 35),
-			// new Coord(60, 22),
-			// new Coord(70, 28),
-			// new Coord(80, 60),
-			// new Coord(90, 70),
-			// new Coord(100, 16),
-			new Coord(0, 0),
-			new Coord(0.10, 0.090264),
-			new Coord(0.20, 0.162149),
-			new Coord(0.30, 0.216968),
-			new Coord(0.40, 0.255630),
-			new Coord(0.50, 0.278673),
-			new Coord(0.60, 0.286290),
-			new Coord(0.70, 0.278352),
-			new Coord(0.80, 0.254416),
-			new Coord(0.90, 0.213736),
-			new Coord(0.100, 0.2)
-		];
+
+	function zooming(){
+		cS = document.getElementById('zoom').value;
+		create();
+	}
+
+	function calcFunc(mode){
+		if (mode == 1)  func = [
+						new Coord(0.00, 10),
+						new Coord(0.10, 11),
+						new Coord(0.20, 6),
+						new Coord(0.30, 10),
+						new Coord(0.40, 4),
+						new Coord(0.50, 10),
+						new Coord(0.60, 3),
+						new Coord(0.70, 1),
+						new Coord(0.80, 10),
+						new Coord(0.90, 14),
+						new Coord(0.100, 14)
+						];
+		else if (mode == 2)  func = [
+						     new Coord(0.00, 10),
+							 new Coord(0.10, 30),
+							 new Coord(0.20, 18),
+							 new Coord(0.30, 30),
+						 	 new Coord(0.40, 40),
+							 new Coord(0.50, 35),
+						  	 new Coord(0.60, 22),
+							 new Coord(0.70, 28),
+							 new Coord(0.80, 60),
+							 new Coord(0.90, 70),
+							 new Coord(0.100, 16),
+							 ];
+		else if (mode == 3) func = [
+							 new Coord(0.00, 0),
+							 new Coord(0.10, 0),
+							 new Coord(0.20, -47),
+							 new Coord(0.30, 335),
+							 new Coord(0.40, 26),
+						  	 new Coord(0.50, 387),
+							 new Coord(0.60, 104),
+							 new Coord(0.70, 0),
+							 new Coord(0.80, 100),
+							 new Coord(0.90, 0),
+							 new Coord(0.100, 10),
+							];
 
 		n = func.length * 10;
-		console.log(func);
 	}
 
 
@@ -138,8 +170,8 @@
     			((( Math.pow(i - func[i1].x, 2) * (i - func[i1 + 1].x) ) / Math.pow(hSpline, 2)) * m[i1 + 1]));
     		else S = func[i1].y;
 
-    		var coord = new Coord(i2, S);
-    		console.log(S);
+    		var coord = new Coord(i, S);
+    		console.log(coord);
     		funcSpline.push(coord);
 		}
 		
@@ -149,6 +181,7 @@
 	function calcLagrange(){
 
 		let degree = func.length - 1;
+		let divider = 100;
 
 		function calcP(x, i, deg){
 			let num = 1,
@@ -173,8 +206,9 @@
 		}
 
 		for(let x = 0; x <= n; x++){
-			let y = calcL(x, degree);
-			var coord = new Coord(x, y);
+			let y = calcL(x/divider, degree);
+			var coord = new Coord(x/divider, y);
+			console.log(coord);
 			funcLagrange.push(coord);
 		}
 	}
@@ -182,18 +216,26 @@
 
 	function drawFunc(){
 		ctx.fillStyle = 'green';
-		for(let i = 0; i < func.length; i++){
-			ctx.fillRect(func[i].x * 1.5 * cS + off, func[i].y * cS + off, 5, 5);
+		for(let i = 0; i < func.length - 1; i++){
+			ctx.fillRect(func[i].x * 100 * 1.5 * cS + off, func[i].y * cS + off, 5, 5);
 		}	
+		ctx.strokeStyle = 'green';
+		ctx.beginPath();
+		for(i = 0; i < func.length - 1; i++){
+			ctx.lineTo(func[i].x * 100 * 1.5 * cS + off, func[i].y * cS + off);
+		}
+		ctx.lineWidth = 3.5;
+		ctx.stroke();
+		ctx.closePath();
 	}
 
 
 	function drawFuncSpline(arr, color){
-		for(let i = 0; i < n; i++){
+		for(let i = 0; i < n - 20; i++){
 			ctx.strokeStyle = color;
 			ctx.beginPath();
-			ctx.moveTo(off + arr[i].x * 1.5 * cS, off + arr[i].y * cS);
-			ctx.lineTo(off + arr[i + 1].x * 1.5 * cS, off + arr[i + 1].y * cS);
+			ctx.moveTo(off + arr[i].x * 1.5 * cS * 100, off + arr[i].y * cS);
+			ctx.lineTo(off + arr[i + 1].x * 1.5 * cS * 100, off + arr[i + 1].y * cS);
 			ctx.lineWidth = 2.4;
 			ctx.stroke();
 			ctx.closePath();
@@ -214,19 +256,121 @@
     	ctx.closePath();
 	}
 
+	let flags = {
+		True    : true,
+		Spline  : true,
+		Lagrange: true,
+	}
 
+	function minusTrue(){
+		ctx.clearRect(0, 0, 2000, 2000);
+
+		if(!flags.True){
+			drawFunc();
+			flags.True = true;
+			this.classList.remove("active");
+		}else{
+			flags.True = false;
+			this.classList.add("active");
+		}
+
+		if(flags.Spline){
+			drawFuncSpline(funcSpline, "blue");
+		}
+
+		if(flags.Lagrange){
+			drawFuncSpline(funcLagrange, "red");
+		}
+		
+		drawAxis();
+	}
+
+
+	function minusSpline(){
+		ctx.clearRect(0, 0, 2000, 2000);
+
+		if(flags.True){
+			drawFunc();
+		}
+
+		if(!flags.Spline){
+			drawFuncSpline(funcSpline, "blue");
+			flags.Spline = true;
+			this.classList.remove("active");
+		}else{
+			flags.Spline = false;
+			this.classList.add("active");
+		}
+
+		if(flags.Lagrange){
+			drawFuncSpline(funcLagrange, "red");
+		}
+		
+		drawAxis();
+	}
+
+
+function minusLagrange(){
+	ctx.clearRect(0, 0, 2000, 2000);
+
+	if(flags.True){
+		drawFunc();
+	}
+
+	if(flags.Spline){
+		drawFuncSpline(funcSpline, "blue");
+	}
+
+	if(!flags.Lagrange){
+		drawFuncSpline(funcLagrange, "red");
+		flags.Lagrange = true;
+		this.classList.remove("active");
+	}else{
+		flags.Lagrange = false;
+		this.classList.add("active");
+	}
+	
+	drawAxis();
+}
+
+function dn1Set() {
+	globalMode = 1;
+	create();
+}
+function dn2Set() {
+	globalMode = 2;
+	create();
+}
+function dn3Set() {
+	globalMode = 3;
+	create();
+}
+
+function create() {
+	ctx.clearRect(0, 0, 2000, 2000);
+	//вычисления
+	calcFunc(globalMode);
+	calcSpline();
+	calcLagrange();
+
+	//строим
+	drawAxis();
+	drawFunc();
+	drawFuncSpline(funcLagrange, "red");
+	drawFuncSpline(funcSpline, "blue");
+}
 
 	window.onload = () => {
-		//вычисления
-		calcFunc();
-		calcSpline();
-		calcLagrange();
+		create();
 
-		//строим
-		drawAxis();
-		drawFuncSpline(funcLagrange, "red");
-		drawFuncSpline(funcSpline, "blue");
-		drawFunc();
+		document.getElementById('true').addEventListener('click', minusTrue, false);
+		document.getElementById('spline').addEventListener('click', minusSpline, false);
+		document.getElementById('lagrange').addEventListener('click', minusLagrange, false);
+		document.getElementById('rezoom').addEventListener('click', zooming, false);
+
+		document.getElementById('dn1').addEventListener('click', dn1Set, false);
+		document.getElementById('dn2').addEventListener('click', dn2Set, false);
+		document.getElementById('dn3').addEventListener('click', dn3Set, false);
 	}
 
 </script>
